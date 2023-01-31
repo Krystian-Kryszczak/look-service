@@ -1,0 +1,45 @@
+micronaut:
+  application:
+    name: look
+  security:
+    authentication: bearer
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: ${JWT_GENERATOR_SIGNATURE_SECRET}
+              base64: true
+              jws-algorithm: HS256
+  server:
+    port: 8082
+    netty:
+      access-logger:
+        enabled: true
+        log-format: common
+    max-request-size: 4GB
+    multipart:
+      max-file-size: 4GB
+#    http-version: http_2_0
+netty:
+  default:
+    allocator:
+      max-order: 3
+cassandra:
+  default:
+    advanced:
+      #      ssl: true
+      #      ssl-engine-factory: DefaultSslEngineFactory
+      metadata:
+        schema:
+          enabled: true
+    #      auth-provider:
+    #        class: PlainTextAuthProvider
+    #        username: "XXXXXX"
+    #        password: "XXXXXX"
+    basic:
+      contact-points:
+        - ${CASSANDRA_HOST:127.0.0.1}:${CASSANDRA_PORT:9042}
+      load-balancing-policy:
+        local-datacenter: ${CASSANDRA_DATA_CENTER:datacenter1}
+      session-keyspace: app
