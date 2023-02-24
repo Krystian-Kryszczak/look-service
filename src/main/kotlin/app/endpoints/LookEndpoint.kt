@@ -5,6 +5,7 @@ import app.service.exhibit.look.LookService
 import app.utils.SecurityUtils
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import io.micronaut.http.HttpResponse
+import io.micronaut.http.HttpStatus
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.Controller
 import io.micronaut.http.annotation.Get
@@ -32,27 +33,25 @@ class LookEndpoint(private val lookService: LookService) {
 
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Post(consumes = [MediaType.MULTIPART_FORM_DATA])
-    fun add(@Part title: String, @Part description: String, @Part private: String?,
-            @Part content: StreamingFileUpload?, authentication: Authentication): Single<out HttpResponse<UUID>> {
+    fun add(@Part look: Look, @Part content: StreamingFileUpload?, authentication: Authentication): Single<out HttpResponse<UUID>> {
+        if (look.isInvalid()) return Single.just(HttpResponse.status(HttpStatus.BAD_REQUEST, "look can not have id"))
 
-        val clientId = SecurityUtils.getClientId(authentication)!!
-        val lookId = Uuids.timeBased()
-        val isPrivate = private?.toBooleanStrictOrNull() == true
+        val generatedLookId = Uuids.timeBased()
+        val clientId = SecurityUtils.getClientId(authentication) ?: return Single.just(HttpResponse.status(HttpStatus.UNAUTHORIZED))
 
-        return lookService.add(
-            lookId,
-            title,
-            clientId,
-            description,
-            isPrivate,
-            content,
-        ).map {
-            HttpResponse.created(lookId)
-        }.onErrorReturn {
-            logger.error(it.message, it.stackTrace)
-            return@onErrorReturn HttpResponse.serverError()
-        }
+        look.id = generatedLookId
+        look.creatorId = clientId
+
+        return lookService.add(look, content)
+            .map {
+                HttpResponse.created(generatedLookId)
+            }.onErrorReturn {
+                logger.error(it.message, it.stackTrace)
+                return@onErrorReturn HttpResponse.serverError()
+            }
     }
+
+    private fun Look.isInvalid(): Boolean = id != null || creatorId != null
 
     companion object {
         private val logger = LoggerFactory.getLogger(LookEndpoint::class.java)

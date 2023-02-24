@@ -3,7 +3,6 @@ package app.service.exhibit.look
 import app.model.exhibit.look.Look
 import app.service.being.user.UserService
 import app.service.blob.media.image.ImageBlobService
-import app.service.blob.media.video.VideoBlobService
 import app.service.exhibit.AbstractExhibitService
 import app.storage.cassandra.dao.exhibit.look.LookDao
 import app.utils.SecurityUtils
@@ -36,26 +35,36 @@ class LookServiceCassandra(
 
     override fun findById(id: UUID, authentication: Authentication?): Maybe<Look> =
         findById(id)
-        .filter {
-            !it.private || SecurityUtils.clientIsCreator(it.creatorId, authentication)
-        }
-        .flatMap { look ->
-            val creatorId = look.creatorId
-            if (creatorId != null) userService.findByIdAsync(creatorId).map { user ->
-                look.creatorName = (user.name ?: "·") + " " + (user.lastname ?: "·")
-                return@map look
-            } else Maybe.empty()
-        }
+            .filter {
+                it.canUserSeeIt(authentication)
+            }.flatMap { look ->
+                val creatorId = look.creatorId
+                if (creatorId != null)
+                    userService.findByIdAsync(creatorId)
+                        .map { user ->
+                            look.creatorName = (user.name ?: "·") + " " + (user.lastname ?: "·")
+                            look
+                        } else {
+                            Maybe.empty()
+                        }
+            }
 
-    override fun add(id: UUID, name: String, creatorId: UUID, description: String?, isPrivate: Boolean, content: StreamingFileUpload?): Single<Boolean> {
-        return save(Look(id, name, creatorId, description, content != null, 0, 0, isPrivate))
-            .andThen(if (content != null) imageBlobService.save(id, content, creatorId, isPrivate) else Single.just(true))
-    }
-    @Deprecated("")
+    private fun Look.canUserSeeIt(authentication: Authentication?): Boolean = !private || SecurityUtils.clientIsCreator(creatorId, authentication)
+
     override fun add(item: Look, content: StreamingFileUpload?): Single<Boolean> {
-        if (item.id == null || item.creatorId == null) return Single.just(false)
-        return save(item)
-            .andThen(if (content != null) imageBlobService.save(item.id!!, content, item.creatorId!!, item.private) else Single.just(true))
+        val itemId = item.id ?: return Single.just(false)
+        val itemCreatorId = item.creatorId ?: return Single.just(false)
+
+        item.hasImages = content != null
+
+        return save(item).toSingleDefault(false)
+        .flatMap {
+            if (content != null) {
+                imageBlobService.save(itemId, content, itemCreatorId, item.private)
+            } else {
+                Single.just(true)
+            }
+        }
     }
     override fun deleteById(id: UUID): Completable = Completable.fromPublisher(lookDao.deleteByIdReactive(id))
     override fun deleteByIdIfExists(id: UUID): Single<Boolean> = Single.fromPublisher(lookDao.deleteByIdIfExistsReactive(id))
