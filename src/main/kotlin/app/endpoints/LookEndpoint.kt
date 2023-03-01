@@ -34,7 +34,7 @@ class LookEndpoint(private val lookService: LookService) {
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Post(consumes = [MediaType.MULTIPART_FORM_DATA])
     fun add(@Part look: Look, @Part content: StreamingFileUpload?, authentication: Authentication): Single<out HttpResponse<UUID>> {
-        if (look.isInvalid()) return Single.just(HttpResponse.status(HttpStatus.BAD_REQUEST, "look can not have id"))
+        if (look.isInvalid()) return Single.just(HttpResponse.status(HttpStatus.BAD_REQUEST, "look is invalid"))
 
         val generatedLookId = Uuids.timeBased()
         val clientId = SecurityUtils.getClientId(authentication) ?: return Single.just(HttpResponse.status(HttpStatus.UNAUTHORIZED))
