@@ -1,9 +1,8 @@
 package app.endpoints
 
 import app.model.exhibit.look.Look
+import app.model.exhibit.look.LookModel
 import app.service.exhibit.look.LookService
-import app.utils.SecurityUtils
-import com.datastax.oss.driver.api.core.uuid.Uuids
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.MediaType
@@ -33,27 +32,22 @@ class LookEndpoint(private val lookService: LookService) {
 
     @Secured(SecurityRule.IS_AUTHENTICATED)
     @Post(consumes = [MediaType.MULTIPART_FORM_DATA])
-    fun add(@Part look: Look, @Part content: StreamingFileUpload?, authentication: Authentication): Single<out HttpResponse<UUID>> {
-        if (look.isInvalid()) return Single.just(HttpResponse.status(HttpStatus.BAD_REQUEST, "look is invalid"))
+    fun add(@Part lookModel: LookModel, @Part content: StreamingFileUpload?, authentication: Authentication): Single<out HttpResponse<UUID>> {
 
-        val generatedLookId = Uuids.timeBased()
-        val clientId = SecurityUtils.getClientId(authentication) ?: return Single.just(HttpResponse.status(HttpStatus.UNAUTHORIZED))
 
-        look.id = generatedLookId
-        look.creatorId = clientId
+        val look: Look = lookModel.convert(authentication) ?: return Single.just(invalidLookModelResp)
 
         return lookService.add(look, content)
-            .map {
-                HttpResponse.created(generatedLookId)
-            }.onErrorReturn {
+            .map { HttpResponse.created(it) }
+            .defaultIfEmpty(invalidLookModelResp)
+            .onErrorReturn {
                 logger.error(it.message, it.stackTrace)
-                return@onErrorReturn HttpResponse.serverError()
+                HttpResponse.serverError()
             }
     }
 
-    private fun Look.isInvalid(): Boolean = id != null || creatorId != null
-
     companion object {
         private val logger = LoggerFactory.getLogger(LookEndpoint::class.java)
+        private val invalidLookModelResp = HttpResponse.status<UUID>(HttpStatus.BAD_REQUEST, "Look model is invalid.")
     }
 }

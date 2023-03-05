@@ -51,20 +51,22 @@ class LookServiceCassandra(
 
     private fun Look.canUserSeeIt(authentication: Authentication?): Boolean = !private || SecurityUtils.clientIsCreator(creatorId, authentication)
 
-    override fun add(item: Look, content: StreamingFileUpload?): Single<Boolean> {
-        val itemId = item.id ?: return Single.just(false)
-        val itemCreatorId = item.creatorId ?: return Single.just(false)
+    override fun add(item: Look, content: StreamingFileUpload?): Maybe<UUID> {
+        val itemId = item.id ?: return Maybe.empty()
+        val itemCreatorId = item.creatorId ?: return Maybe.empty()
 
         item.hasImages = content != null
 
-        return save(item).toSingleDefault(false)
-        .flatMap {
-            if (content != null) {
-                imageBlobService.save(itemId, content, itemCreatorId, item.private)
-            } else {
-                Single.just(true)
+        return save(item)
+            .toSingleDefault(content != null)
+            .flatMapMaybe {
+                if (content != null) {
+                    imageBlobService.save(itemId, content, itemCreatorId, item.private)
+                        .flatMapMaybe { Maybe.just(item.id) }
+                } else {
+                    Maybe.empty()
+                }
             }
-        }
     }
     override fun deleteById(id: UUID): Completable = Completable.fromPublisher(lookDao.deleteByIdReactive(id))
     override fun deleteByIdIfExists(id: UUID): Single<Boolean> = Single.fromPublisher(lookDao.deleteByIdIfExistsReactive(id))

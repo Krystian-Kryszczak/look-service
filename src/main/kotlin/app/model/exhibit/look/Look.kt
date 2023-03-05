@@ -8,9 +8,9 @@ import java.util.UUID
 @SchemaHint(targetElement = SchemaHint.TargetElement.TABLE)
 data class Look(
     @PartitionKey
-    override var id: UUID? = null,
+    override val id: UUID? = null,
     override var name: String? = null,
-    override var creatorId: UUID? = null,
+    override val creatorId: UUID? = null,
     var description: String? = null,
     var hasImages: Boolean = false,
     override var views: Int = 0,

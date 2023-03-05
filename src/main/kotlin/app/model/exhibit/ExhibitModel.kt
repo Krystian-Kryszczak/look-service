@@ -1,11 +1,10 @@
 package app.model.exhibit
 
-import java.util.UUID
+import io.micronaut.security.authentication.Authentication
 
 abstract class ExhibitModel<T: Exhibit>(
     val name: String? = null,
-    val private: Boolean = false,
-    val mediaCount: Int = 1
+    val private: Boolean = false
 ) {
-    abstract fun convert(creatorId: UUID): T
+    abstract fun convert(authentication: Authentication): T?
 }

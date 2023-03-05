@@ -14,8 +14,10 @@ abstract class Exhibit(
     open var rating: Int = 0,
     open var private: Boolean = false,
 ): NamedItem(id, name) {
-    @Transient var creatorName: String? = null
-    @Transient var creatorSubscriptions: Int? = null
+    @Transient
+    var creatorName: String? = null
+    @Transient
+    var creatorSubscriptions: Int? = null
 
     @Transient
     @JsonIgnore
