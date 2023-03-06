@@ -15,11 +15,6 @@ abstract class Exhibit(
     open var private: Boolean = false,
 ): NamedItem(id, name) {
     @Transient
-    var creatorName: String? = null
-    @Transient
-    var creatorSubscriptions: Int? = null
-
-    @Transient
     @JsonIgnore
     fun getUnixTimestamp(): Long? {
         return Uuids.unixTimestamp(id ?: return null)
