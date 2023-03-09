@@ -1,9 +1,6 @@
 package app.model.exhibit
 
 import app.model.NamedItem
-import com.datastax.oss.driver.api.core.uuid.Uuids
-import com.datastax.oss.driver.api.mapper.annotations.Transient
-import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID
 
 abstract class Exhibit(
@@ -13,10 +10,4 @@ abstract class Exhibit(
     open var views: Int = 0,
     open var rating: Int = 0,
     open var private: Boolean = false,
-): NamedItem(id, name) {
-    @Transient
-    @JsonIgnore
-    fun getUnixTimestamp(): Long? {
-        return Uuids.unixTimestamp(id ?: return null)
-    }
-}
+): NamedItem(id, name)
