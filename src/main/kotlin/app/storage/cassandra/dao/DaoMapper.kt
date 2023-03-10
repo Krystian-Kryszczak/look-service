@@ -15,6 +15,7 @@ interface DaoMapper {
     fun userDao(@DaoKeyspace keyspace: CqlIdentifier): UserDao
     @DaoFactory
     fun lookDao(@DaoKeyspace keyspace: CqlIdentifier): LookDao
+
     companion object {
         @JvmStatic
         fun builder(session: CqlSession): MapperBuilder<DaoMapper> {
