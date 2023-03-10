@@ -1,4 +1,4 @@
-package app.endpoints
+package app.endpoint
 
 import app.model.exhibit.look.Look
 import app.model.exhibit.look.LookModel
