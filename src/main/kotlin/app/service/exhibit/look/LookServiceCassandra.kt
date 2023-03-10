@@ -4,7 +4,7 @@ import app.model.exhibit.look.Look
 import app.service.blob.media.image.ImageBlobService
 import app.service.exhibit.AbstractExhibitService
 import app.storage.cassandra.dao.exhibit.look.LookDao
-import app.utils.SecurityUtils
+import app.util.SecurityUtils
 import io.micronaut.http.multipart.StreamingFileUpload
 import io.micronaut.security.authentication.Authentication
 import io.reactivex.rxjava3.core.Completable

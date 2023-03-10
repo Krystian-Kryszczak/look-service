@@ -1,7 +1,7 @@
 package app.model.exhibit.look
 
 import app.model.exhibit.ExhibitModel
-import app.utils.SecurityUtils
+import app.util.SecurityUtils
 import com.datastax.oss.driver.api.core.uuid.Uuids
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.security.authentication.Authentication
