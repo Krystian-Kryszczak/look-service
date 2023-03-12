@@ -1,4 +1,8 @@
 package app.model.exhibit.look
 
-class LookModelTest {
-}
+import io.kotest.core.spec.style.StringSpec
+
+class LookModelTest: StringSpec({
+
+    "test" {}
+})

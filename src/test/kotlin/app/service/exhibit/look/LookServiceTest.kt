@@ -1,4 +1,10 @@
 package app.service.exhibit.look
 
-class LookServiceTest {
-}
+import io.kotest.core.spec.style.StringSpec
+import io.micronaut.test.extensions.kotest.annotation.MicronautTest
+
+@MicronautTest
+class LookServiceTest: StringSpec({
+
+    "test" {}
+})
