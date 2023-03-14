@@ -1,4 +1,4 @@
-package app.storage.cassandra.factory
+package app.factory.cassandra
 
 import app.storage.cassandra.dao.DaoMapper
 import app.storage.cassandra.dao.being.user.UserDao
