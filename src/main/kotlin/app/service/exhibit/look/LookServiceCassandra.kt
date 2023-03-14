@@ -43,6 +43,6 @@ class LookServiceCassandra(
                 }
             }
     }
-    override fun deleteById(id: UUID): Completable = Completable.fromPublisher(lookDao.deleteByIdReactive(id))
-    override fun deleteByIdIfExists(id: UUID): Single<Boolean> = Single.fromPublisher(lookDao.deleteByIdIfExistsReactive(id))
+    override fun deleteByIdReactive(id: UUID): Completable = Completable.fromPublisher(lookDao.deleteByIdReactive(id))
+    override fun deleteByIdIfExistsReactive(id: UUID): Single<Boolean> = Single.fromPublisher(lookDao.deleteByIdIfExistsReactive(id))
 }

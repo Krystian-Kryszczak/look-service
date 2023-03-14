@@ -11,6 +11,6 @@ interface ItemService<T: Item> {
     fun findById(id: UUID): Maybe<T>
     fun update(item: T): Completable
     fun delete(item: T): Completable
-    fun deleteById(id: UUID): Completable
-    fun deleteByIdIfExists(id: UUID): Single<Boolean>
+    fun deleteByIdReactive(id: UUID): Completable
+    fun deleteByIdIfExistsReactive(id: UUID): Single<Boolean>
 }
